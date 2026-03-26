@@ -12,7 +12,7 @@ const inventory =[
     "id": 2,
     "name": "Wheat Flour",
     "category": "Grains",
-    "quantity": 30,
+    "quantity": 50,
     "price": 35,
     "supplier": "XYZ Suppliers",
     "expiryDate": "2026-08-15"
