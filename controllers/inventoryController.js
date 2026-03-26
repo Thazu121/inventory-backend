@@ -1,102 +1,128 @@
 import inventory from "../model/inventoryData.js";
 
 const getItems = (req, res) => {
-    let result = inventory
+  let result = inventory
 
-    const { name, category, quantity } = req.query
+  const { name, category, quantity } = req.query
 
-    const nameQuery = name?.trim().toLowerCase()
-    const categoryQuery = category?.trim().toLowerCase()
+  const nameQuery = name?.trim().toLowerCase()
+  const categoryQuery = category?.trim().toLowerCase()
 
-    if (nameQuery) {
-        result = result.filter(item =>
-            item.name.toLowerCase().includes(nameQuery)
-        )
-    }
+  if (nameQuery) {
+    result = result.filter(item =>
+      item.name.toLowerCase().includes(nameQuery)
+    )
+  }
 
-    if (quantity !== undefined) {
-        result = result.filter(item =>
-            item.quantity === Number(quantity)
-        )
-    }
+  if (quantity !== undefined && !isNaN(quantity)) {
+    result = result.filter(item =>
+      item.quantity === Number(quantity)
+    )
+  }
 
-    if (categoryQuery) {
-        result = result.filter(item =>
-            item.category.toLowerCase() === categoryQuery
-        )
-    }
+  if (categoryQuery) {
+    result = result.filter(item =>
+      item.category.toLowerCase() === categoryQuery
+    )
+  }
 
-    res.status(200).json({
-        success: true,
-        count: result.length,
-        data: result
-    })
-}
+  res.status(200).json({
+    success: true,
+    count: result.length,
+    data: result
+  })
+};
 
-const singleItem = (req, res) => {
-    const id = Number(req.params.id)
-
-    const item = inventory.find(item => item.id === id)
-
-    if (!item) {
-        return res.status(404).json({
-            message: "Item not found"
-        })
-    }
-
-    res.status(200).json({
-        success: true,
-        data: item
-    })
-}
-
-const addItems = (req, res) => {
-
-    const newId = inventory.length
-        ? Math.max(...inventory.map(item => item.id)) + 1
-        : 1
-
-    const newItem = {
-        id: newId,
-        ...req.body
-    };
-
-    inventory.push(newItem);
-
-    res.status(201).json({
-        success: true,
-        data: newItem
-    })
-}
-
-const replaceItem = (req, res) => {
+const singleItem = (req, res, next) => {
   const id = Number(req.params.id)
 
-  const index = inventory.findIndex(item => item.id === id)
+  const item = inventory.find(item => item.id === id)
+
+  if (!item) {
+    const error = new Error("Item not found");
+    error.status = 404
+    return next(error)
+  }
+
+  res.status(200).json({
+    success: true,
+    data: item
+  })
+}
+
+const addItems = (req, res, next) => {
+  try {
+    const newId = inventory.length
+      ? Math.max(...inventory.map(item => item.id)) + 1
+      : 1
+
+    const newItem = {
+      id: newId,
+      ...req.body
+    }
+
+    inventory.push(newItem)
+
+    res.status(201).json({
+      success: true,
+      data: newItem
+    })
+  } catch (err) {
+    next(err)
+  }
+}
+
+const replaceItem = (req, res, next) => {
+  const id = Number(req.params.id);
+
+  const index = inventory.findIndex(item => item.id === id);
 
   if (index === -1) {
-    return res.status(404).json({ message: "Item not found" })
+    const error = new Error("Item not found");
+    error.status = 404;
+    return next(error);
+  }
+
+  const { name, quantity, category, price, supplier } = req.body;
+
+  if (
+    !name ||
+    !category ||
+    quantity === undefined ||
+    price === undefined ||
+    !supplier
+  ) {
+    return res.status(400).json({
+      message:
+        "PUT request must include all fields: name, quantity, category, price, supplier",
+    });
   }
 
   inventory[index] = {
     id,
-    ...req.body
-  };
+    name,
+    quantity,
+    category,
+    price,
+    supplier,
+  }
 
   res.status(200).json({
     success: true,
-    data: inventory[index]
+    data: inventory[index],
   });
 };
 
 
-const updateItem = (req, res) => {
-  const id = Number(req.params.id);
+const updateItem = (req, res, next) => {
+  const id = Number(req.params.id)
 
-  const item = inventory.find(item => item.id === id);
+  const item = inventory.find(item => item.id === id)
 
   if (!item) {
-    return res.status(404).json({ message: "Item not found" });
+    const error = new Error("Item not found")
+    error.status = 404
+    return next(error)
   }
 
   Object.assign(item, req.body)
@@ -107,32 +133,31 @@ const updateItem = (req, res) => {
   })
 }
 
+const deleteItem = (req, res, next) => {
+  const id = Number(req.params.id)
 
-const deleteItem = (req, res) => {
-    const id = Number(req.params.id);
+  const index = inventory.findIndex(item => item.id === id)
 
-    const index = inventory.findIndex(item => item.id === id);
+  if (index === -1) {
+    const error = new Error("Item not found")
+    error.status = 404
+    return next(error)
+  }
 
-    if (index === -1) {
-        return res.status(404).json({
-            message: "Item not found"
-        })
-    }
+  const deletedItem = inventory.splice(index, 1)[0]
 
-    const deletedItem = inventory.splice(index, 1)[0];
-
-    res.status(200).json({
-        success: true,
-        message: "Item deleted",
-        data: deletedItem
-    })
+  res.status(200).json({
+    success: true,
+    message: "Item deleted",
+    data: deletedItem
+  })
 }
 
 export {
-    getItems,
-    singleItem,
-    addItems,
-    updateItem,
-    replaceItem,
-    deleteItem
+  getItems,
+  singleItem,
+  addItems,
+  replaceItem,
+  updateItem,
+  deleteItem
 }

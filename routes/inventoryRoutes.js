@@ -6,7 +6,7 @@ inventoryRouter.get("/",getItems)
 inventoryRouter.get("/:id",singleItem)
 inventoryRouter.post("/",validateItem,addItems)
 inventoryRouter.patch("/:id",validateItem,updateItem)
-inventoryRouter.put("/items/:id", validateItem, replaceItem)
+inventoryRouter.put("/:id", validateItem, replaceItem)
 inventoryRouter.delete("/:id",deleteItem)
 
 export default inventoryRouter
