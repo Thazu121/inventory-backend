@@ -4,9 +4,9 @@ import { addItems, deleteItem, getItems, singleItem, updateItem,replaceItem } fr
 import validateItem from "../middleware/validation.js"
 inventoryRouter.get("/",getItems)
 inventoryRouter.get("/:id",singleItem)
-inventoryRouter.post("/",validateItem,addItems)
+inventoryRouter.post("/addItem",validateItem,addItems)
 inventoryRouter.patch("/:id",validateItem,updateItem)
 inventoryRouter.put("/:id", validateItem, replaceItem)
-inventoryRouter.delete("/:id",deleteItem)
+inventoryRouter.delete("/deleteItem/:id",deleteItem)
 
 export default inventoryRouter
