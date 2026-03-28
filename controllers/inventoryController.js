@@ -72,46 +72,7 @@ const addItems = (req, res, next) => {
   }
 }
 
-const replaceItem = (req, res, next) => {
-  const id = Number(req.params.id);
 
-  const index = inventory.findIndex(item => item.id === id);
-
-  if (index === -1) {
-    const error = new Error("Item not found");
-    error.status = 404;
-    return next(error);
-  }
-
-  const { name, quantity, category, price, supplier } = req.body;
-
-  if (
-    !name ||
-    !category ||
-    quantity === undefined ||
-    price === undefined ||
-    !supplier
-  ) {
-    return res.status(400).json({
-      message:
-        "PUT request must include all fields: name, quantity, category, price, supplier",
-    });
-  }
-
-  inventory[index] = {
-    id,
-    name,
-    quantity,
-    category,
-    price,
-    supplier,
-  }
-
-  res.status(200).json({
-    success: true,
-    data: inventory[index],
-  });
-};
 
 
 const updateItem = (req, res, next) => {
@@ -157,7 +118,6 @@ export {
   getItems,
   singleItem,
   addItems,
-  replaceItem,
   updateItem,
   deleteItem
 }
