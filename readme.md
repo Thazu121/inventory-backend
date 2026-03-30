@@ -6,7 +6,6 @@ Features
 .Get all items with optional filters
 .Get a single item by ID
 .Add a new item
-.Replace an item fully (PUT)
 .Update an item partially (PATCH)
 .Delete an item by ID
 .Validation middleware:
